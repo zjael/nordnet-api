@@ -1,0 +1,25 @@
+{
+  "name": "nordnet-api",
+  "version": "1.0.0",
+  "description": "Nordnet.dk Unofficial API",
+  "main": "src/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zjael/nordnet-api.git"
+  },
+  "keywords": [
+    "nordnet",
+    "api",
+    "unofficial"
+  ],
+  "author": "Jakob Sjælland",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zjael/nordnet-api/issues"
+  },
+  "homepage": "https://github.com/zjael/nordnet-api#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
