@@ -1,14 +1,21 @@
 {
   "name": "nordnet-api",
   "version": "2.0.0",
-  "description": "Nordnet.dk Unofficial API - Modern TypeScript implementation",
+  "description": "Nordnet.dk Unofficial API - Modern TypeScript implementation with dual ESM/CJS support",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
@@ -18,8 +25,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -42,7 +49,9 @@
     "typescript",
     "denmark",
     "stocks",
-    "trading"
+    "trading",
+    "esm",
+    "commonjs"
   ],
   "author": "Jakob Sjælland",
   "license": "MIT",
@@ -61,6 +70,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
     "prettier": "^3.2.4",
+    "tsup": "^8.5.0",
     "typescript": "^5.3.3",
     "vitest": "^1.2.0"
   },

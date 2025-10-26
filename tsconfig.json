@@ -42,7 +42,8 @@
   },
   "include": [
     "src/**/*",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "tsup.config.ts"
   ],
   "exclude": [
     "node_modules",

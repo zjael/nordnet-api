@@ -28,7 +28,7 @@
 ## 🚀 Features
 
 - ✅ **Full TypeScript support** with comprehensive type definitions
-- ✅ **ESM modules** for modern JavaScript
+- ✅ **Dual build support** - Both ESM and CommonJS
 - ✅ **Native fetch API** (Node.js 18+)
 - ✅ **Built-in rate limiting** to prevent API abuse
 - ✅ **Comprehensive error handling** with descriptive messages
@@ -36,6 +36,7 @@
 - ✅ **Auto-retry on authentication failures**
 - ✅ **Pagination support** for large datasets
 - ✅ **100% test coverage** with Vitest
+- ✅ **Live test examples** included
 
 ---
 
@@ -103,15 +104,43 @@ const funds = await client.fundlist();
 console.log(`Found ${funds.length} funds`);
 ```
 
-### CommonJS (Legacy)
+### CommonJS
 
 ```javascript
-// Note: v2.x is ESM-only. For CommonJS, use dynamic import:
-const { Nordnet } = await import('nordnet-api');
+// v2.x supports both ESM and CommonJS!
+const { Nordnet } = require('nordnet-api');
 
 const client = new Nordnet('your-username', 'your-password');
-// ... use as above
+
+// Use exactly the same as ESM
+client.instrument(17092094).then(console.log);
 ```
+
+### Live Testing
+
+Test the library with your actual Nordnet credentials:
+
+```bash
+# Set credentials via environment variables
+NORDNET_USERNAME=your_username \
+NORDNET_PASSWORD=your_password \
+node examples/live-test.mjs
+
+# Or pass as arguments
+node examples/live-test.mjs your_username your_password
+
+# Test specific instrument and date range
+NORDNET_USERNAME=your_username \
+NORDNET_PASSWORD=your_password \
+NORDNET_INSTRUMENT_ID=17092094 \
+NORDNET_START_DATE=2024-01-01 \
+node examples/live-test.mjs
+```
+
+**Test Scripts:**
+- `examples/test-esm.mjs` - Verify ESM imports work
+- `examples/test-cjs.cjs` - Verify CommonJS requires work
+- `examples/live-test.mjs` - Run live API tests (requires credentials)
 
 ---
 
@@ -316,18 +345,22 @@ try {
 
 ### Breaking Changes
 
-#### 1. **Module System: CommonJS → ESM**
+#### 1. **Module System: Dual ESM/CommonJS Support**
 
-**v1.x (CommonJS):**
+v2.x supports both ESM and CommonJS! Choose the module system that works best for your project.
+
+**v1.x (CommonJS only):**
 ```javascript
 const Nordnet = require('nordnet-api');
 ```
 
-**v2.x (ESM):**
+**v2.x (Both work!):**
 ```typescript
+// ESM (recommended)
 import { Nordnet } from 'nordnet-api';
-// or
-import Nordnet from 'nordnet-api';
+
+// CommonJS (still supported!)
+const { Nordnet } = require('nordnet-api');
 ```
 
 #### 2. **Node.js Requirement**
@@ -368,18 +401,21 @@ try {
 ### Migration Steps
 
 1. **Update Node.js** to version 18 or higher
-2. **Update package.json**:
-   ```json
-   {
-     "type": "module"
-   }
-   ```
-3. **Change imports** from `require()` to `import`
-4. **Update file extensions** to `.mjs` or set `"type": "module"` in package.json
-5. **Add error handling** with try/catch blocks
-6. **Install dependencies**:
+2. **Choose your module system**:
+   - For ESM: Update package.json with `"type": "module"` and use `import`
+   - For CommonJS: Keep using `require()` (no changes needed!)
+3. **Add error handling** with try/catch blocks (v2 has better error messages)
+4. **Install latest version**:
    ```bash
    npm install nordnet-api@latest
+   ```
+5. **Test your integration** using the provided test scripts:
+   ```bash
+   # For ESM
+   node examples/test-esm.mjs
+
+   # For CommonJS
+   node examples/test-cjs.cjs
    ```
 
 ---
@@ -397,11 +433,21 @@ npm install
 ### Scripts
 
 ```bash
-npm run build        # Compile TypeScript to dist/
+# Build
+npm run build        # Build both ESM and CJS with tsup
 npm run dev          # Watch mode for development
-npm test             # Run tests
+
+# Testing
+npm test             # Run unit tests
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
+
+# Manual testing
+node examples/test-esm.mjs              # Test ESM build
+node examples/test-cjs.cjs              # Test CJS build
+node examples/live-test.mjs user pass   # Live API test
+
+# Code quality
 npm run lint         # Lint code
 npm run lint:fix     # Lint and auto-fix
 npm run format       # Format code with Prettier
@@ -417,12 +463,21 @@ nordnet-api/
 │   ├── cookie.ts          # Cookie parsing utilities
 │   ├── rate-limiter.ts    # Rate limiting logic
 │   ├── types.ts           # TypeScript type definitions
-│   ├── *.test.ts          # Test files
-├── dist/                  # Compiled output (gitignored)
+│   └── *.test.ts          # Unit tests
+├── examples/
+│   ├── test-esm.mjs       # ESM import test
+│   ├── test-cjs.cjs       # CommonJS require test
+│   └── live-test.mjs      # Live API test
+├── dist/                  # Compiled output (ESM + CJS)
+│   ├── index.js           # ESM build
+│   ├── index.cjs          # CommonJS build
+│   ├── index.d.ts         # ESM type definitions
+│   └── index.d.cts        # CJS type definitions
 ├── tsconfig.json          # TypeScript configuration
-├── vitest.config.ts       # Vitest configuration
-├── .eslintrc.json         # ESLint configuration
-├── .prettierrc            # Prettier configuration
+├── tsup.config.ts         # Build configuration (dual ESM/CJS)
+├── vitest.config.ts       # Test configuration
+├── .eslintrc.json         # Linting rules
+├── .prettierrc            # Code formatting
 ├── package.json
 └── README.md
 ```
