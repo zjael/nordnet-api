@@ -1,532 +1,172 @@
 # nordnet-api
 
-[![Package version](https://img.shields.io/npm/v/nordnet-api.svg)](https://npmjs.org/package/nordnet-api)
-[![NPM downloads](https://img.shields.io/npm/dm/nordnet-api)](https://npmjs.org/package/nordnet-api)
-[![Make a pull request](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![npm version](https://img.shields.io/npm/v/nordnet-api.svg)](https://npmjs.org/package/nordnet-api)
+[![npm downloads](https://img.shields.io/npm/dm/nordnet-api)](https://npmjs.org/package/nordnet-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
-> Modern TypeScript client for Nordnet.dk (Unofficial)
+Unofficial TypeScript API client for Nordnet.dk. Supports both ESM and CommonJS.
 
-## ⚠️ Important Disclaimers
+## Warning
 
-**UNOFFICIAL API**: This is an **unofficial** API client that uses web scraping techniques to access Nordnet.dk. It is **not endorsed or supported by Nordnet**.
+This is an **unofficial** API that works by scraping Nordnet's web interface. It can break at any time if Nordnet changes their website. **Use at your own risk.**
 
-**BREAKING CHANGES**: This library may stop working at any time if Nordnet changes their website structure or authentication flow.
+For production use, consider [Nordnet's official External API](https://www.nordnet.dk/externalapi/docs/api).
 
-**OFFICIAL ALTERNATIVE**: Nordnet provides an official External API. Consider using it instead:
-- 📚 [Nordnet External API Documentation](https://www.nordnet.dk/externalapi/docs/api)
-- 🔗 [API Examples Repository](https://github.com/nordnet/next-api-v2-examples)
-
-**USE AT YOUR OWN RISK**: By using this library, you acknowledge that:
-- Your account credentials are used to authenticate via web scraping
-- Nordnet may block or suspend accounts that use unofficial APIs
-- No warranty or support is provided
-- You are responsible for complying with Nordnet's Terms of Service
-
----
-
-## 🚀 Features
-
-- ✅ **Full TypeScript support** with comprehensive type definitions
-- ✅ **Dual build support** - Both ESM and CommonJS
-- ✅ **Native fetch API** (Node.js 18+)
-- ✅ **Built-in rate limiting** to prevent API abuse
-- ✅ **Comprehensive error handling** with descriptive messages
-- ✅ **Input validation** for all public methods
-- ✅ **Auto-retry on authentication failures**
-- ✅ **Pagination support** for large datasets
-- ✅ **100% test coverage** with Vitest
-- ✅ **Live test examples** included
-
----
-
-## 📋 Table of Contents
-
-- [Installation](#installation)
-- [Requirements](#requirements)
-- [Quick Start](#quick-start)
-- [API Reference](#api-reference)
-- [Configuration](#configuration)
-- [Error Handling](#error-handling)
-- [Migration Guide (v1 → v2)](#migration-guide-v1--v2)
-- [Development](#development)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## 📦 Installation
+## Installation
 
 ```bash
 npm install nordnet-api
 ```
 
-```bash
-yarn add nordnet-api
-```
+Requires Node.js >= 18.0.0
 
-```bash
-pnpm add nordnet-api
-```
-
----
-
-## 🔧 Requirements
-
-- **Node.js** >= 18.0.0 (for native fetch support)
-- **TypeScript** >= 5.0 (if using TypeScript)
-
----
-
-## 🏁 Quick Start
-
-### TypeScript / ESM
-
-```typescript
-import { Nordnet } from 'nordnet-api';
-
-const client = new Nordnet('your-username', 'your-password');
-
-// Get instrument data
-const instrument = await client.instrument(17092094);
-console.log(instrument);
-
-// Get stock history
-const history = await client.stockhistory(17092094, '2024-01-01');
-console.log(history);
-
-// Get list of Danish stocks
-const stocks = await client.stocklist('DK');
-console.log(`Found ${stocks.length} stocks`);
-
-// Get list of funds
-const funds = await client.fundlist();
-console.log(`Found ${funds.length} funds`);
-```
-
-### CommonJS
-
-```javascript
-// v2.x supports both ESM and CommonJS!
-const { Nordnet } = require('nordnet-api');
-
-const client = new Nordnet('your-username', 'your-password');
-
-// Use exactly the same as ESM
-client.instrument(17092094).then(console.log);
-```
-
-### Live Testing
-
-Test the library with your actual Nordnet credentials:
-
-```bash
-# Set credentials via environment variables
-NORDNET_USERNAME=your_username \
-NORDNET_PASSWORD=your_password \
-node examples/live-test.mjs
-
-# Or pass as arguments
-node examples/live-test.mjs your_username your_password
-
-# Test specific instrument and date range
-NORDNET_USERNAME=your_username \
-NORDNET_PASSWORD=your_password \
-NORDNET_INSTRUMENT_ID=17092094 \
-NORDNET_START_DATE=2024-01-01 \
-node examples/live-test.mjs
-```
-
-**Test Scripts:**
-- `examples/test-esm.mjs` - Verify ESM imports work
-- `examples/test-cjs.cjs` - Verify CommonJS requires work
-- `examples/live-test.mjs` - Run live API tests (requires credentials)
-
----
-
-## 📚 API Reference
-
-### `new Nordnet(username, password, options?)`
-
-Create a new Nordnet API client.
-
-**Parameters:**
-- `username` (string, required): Your Nordnet username
-- `password` (string, required): Your Nordnet password
-- `options` (object, optional):
-  - `maxRetries` (number): Maximum retry attempts for failed requests (default: 3)
-  - `requestsPerSecond` (number): Rate limit for API requests (default: 2)
-
-**Example:**
-
-```typescript
-const client = new Nordnet('username', 'password', {
-  maxRetries: 5,
-  requestsPerSecond: 1, // More conservative rate limiting
-});
-```
-
----
-
-### `client.instrument(id)`
-
-Get detailed information about a specific financial instrument.
-
-**Parameters:**
-- `id` (number | string, required): Instrument ID
-
-**Returns:** `Promise<Record<string, unknown>>`
-
-**Example:**
-
-```typescript
-const instrument = await client.instrument(17092094);
-console.log(instrument);
-```
-
-**Throws:**
-- `Error` if ID is missing
-- `Error` if request fails
-
----
-
-### `client.stockhistory(id, start_date)`
-
-Get historical price data for a stock.
-
-**Parameters:**
-- `id` (number | string, required): Instrument ID
-- `start_date` (string, required): Start date in `YYYY-MM-DD` format
-
-**Returns:** `Promise<Record<string, unknown>>`
-
-**Example:**
-
-```typescript
-const history = await client.stockhistory(17092094, '2024-01-01');
-console.log(history);
-```
-
-**Throws:**
-- `Error` if ID or start_date is missing
-- `Error` if request fails
-
----
-
-### `client.stocklist(exchange_country?)`
-
-Get a paginated list of stocks from a specific exchange.
-
-**Parameters:**
-- `exchange_country` (string, optional): Country code (default: `"DK"`)
-
-**Returns:** `Promise<Array<Record<string, unknown>>>`
-
-**Example:**
-
-```typescript
-// Get Danish stocks
-const dkStocks = await client.stocklist('DK');
-
-// Get Swedish stocks
-const seStocks = await client.stocklist('SE');
-
-// Get Norwegian stocks
-const noStocks = await client.stocklist('NO');
-```
-
-**Throws:**
-- `Error` if exchange_country is missing
-- `Error` if pagination exceeds maximum iterations (1000)
-- `Error` if request fails
-
----
-
-### `client.fundlist()`
-
-Get a paginated list of all funds.
-
-**Returns:** `Promise<Array<Record<string, unknown>>>`
-
-**Example:**
-
-```typescript
-const funds = await client.fundlist();
-console.log(`Found ${funds.length} funds`);
-
-// Filter funds by criteria
-const highYieldFunds = funds.filter((fund) => fund.yield_1y > 5);
-```
-
-**Throws:**
-- `Error` if pagination exceeds maximum iterations (1000)
-- `Error` if request fails
-
----
-
-### `client.isLoggedIn()`
-
-Check if the current session is authenticated.
-
-**Returns:** `Promise<LoginStatusResponse>`
-
-**Example:**
-
-```typescript
-const status = await client.isLoggedIn();
-console.log(status.logged_in); // true or false
-```
-
-**Throws:**
-- `Error` if request fails
-
----
-
-## ⚙️ Configuration
-
-### Rate Limiting
-
-The client includes built-in rate limiting to prevent overwhelming Nordnet's servers:
-
-```typescript
-const client = new Nordnet('username', 'password', {
-  requestsPerSecond: 1, // Max 1 request per second
-});
-```
-
-**Default:** 2 requests per second
-
-### Retry Logic
-
-Failed requests are automatically retried (except authentication failures):
-
-```typescript
-const client = new Nordnet('username', 'password', {
-  maxRetries: 5, // Retry up to 5 times
-});
-```
-
-**Default:** 3 retries
-
----
-
-## 🚨 Error Handling
-
-All methods throw descriptive errors. Always wrap calls in try/catch:
+## Quick Start
 
 ```typescript
 import { Nordnet } from 'nordnet-api';
 
 const client = new Nordnet('username', 'password');
 
-try {
-  const instrument = await client.instrument(17092094);
-  console.log(instrument);
-} catch (error) {
-  if (error instanceof Error) {
-    console.error('Failed to fetch instrument:', error.message);
-  }
-}
-```
+// Get instrument data
+const instrument = await client.instrument(17092094);
 
-### Common Error Scenarios
-
-| Error Message | Cause | Solution |
-|---------------|-------|----------|
-| `Username and password is required` | Missing credentials | Provide both username and password |
-| `Authentication failed: 401` | Invalid credentials | Check username/password |
-| `HTTP 404: Not Found` | Invalid instrument ID | Verify the instrument ID |
-| `Maximum iterations reached` | API pagination issue | Contact support or retry later |
-| `Request to ... failed` | Network or server error | Check internet connection, retry |
-
----
-
-## 🔄 Migration Guide (v1 → v2)
-
-### Breaking Changes
-
-#### 1. **Module System: Dual ESM/CommonJS Support**
-
-v2.x supports both ESM and CommonJS! Choose the module system that works best for your project.
-
-**v1.x (CommonJS only):**
-```javascript
-const Nordnet = require('nordnet-api');
-```
-
-**v2.x (Both work!):**
-```typescript
-// ESM (recommended)
-import { Nordnet } from 'nordnet-api';
-
-// CommonJS (still supported!)
-const { Nordnet } = require('nordnet-api');
-```
-
-#### 2. **Node.js Requirement**
-
-- **v1.x:** Node.js 4.x+
-- **v2.x:** Node.js 18.0.0+ (for native fetch)
-
-#### 3. **TypeScript Support**
-
-v2.x is written in TypeScript with full type definitions included.
-
-#### 4. **Method Signatures**
-
-Method signatures remain the same, but now have full type safety:
-
-```typescript
-// v2.x - TypeScript knows the parameter types
+// Get historical prices
 const history = await client.stockhistory(17092094, '2024-01-01');
-//                                         ^number   ^string
+
+// List stocks by country
+const stocks = await client.stocklist('DK');
+
+// List all funds
+const funds = await client.fundlist();
 ```
 
-#### 5. **Error Handling**
+### CommonJS
 
-v2.x has comprehensive error handling with descriptive messages:
+```javascript
+const { Nordnet } = require('nordnet-api');
+
+const client = new Nordnet('username', 'password');
+// Same API as above
+```
+
+## API
+
+### `new Nordnet(username, password, options?)`
+
+Create a client instance.
+
+**Options:**
+- `requestsPerSecond` - Rate limit (default: 2)
+
+### `client.instrument(id)`
+
+Get instrument details by ID.
+
+### `client.stockhistory(id, startDate)`
+
+Get historical prices. Date format: `YYYY-MM-DD`
+
+### `client.stocklist(country?)`
+
+Get list of stocks. Default country: `DK`
+
+### `client.fundlist()`
+
+Get list of all funds.
+
+### `client.isLoggedIn()`
+
+Check authentication status.
+
+## Configuration
 
 ```typescript
-// v1.x - Silent failures possible
-nordnet.instrument(123).catch(() => {});
+const client = new Nordnet('username', 'password', {
+  requestsPerSecond: 1  // Conservative rate limiting
+});
+```
 
-// v2.x - Descriptive errors
+## Error Handling
+
+All methods throw errors. Always use try/catch:
+
+```typescript
 try {
-  await client.instrument(123);
+  const data = await client.instrument(12345);
 } catch (error) {
-  console.error(error.message); // "Failed to fetch instrument 123: HTTP 404: Not Found"
+  console.error('Failed:', error.message);
 }
 ```
 
-### Migration Steps
+## Testing
 
-1. **Update Node.js** to version 18 or higher
-2. **Choose your module system**:
-   - For ESM: Update package.json with `"type": "module"` and use `import`
-   - For CommonJS: Keep using `require()` (no changes needed!)
-3. **Add error handling** with try/catch blocks (v2 has better error messages)
-4. **Install latest version**:
-   ```bash
-   npm install nordnet-api@latest
-   ```
-5. **Test your integration** using the provided test scripts:
-   ```bash
-   # For ESM
-   node examples/test-esm.mjs
+The package includes test scripts you can run:
 
-   # For CommonJS
-   node examples/test-cjs.cjs
-   ```
+```bash
+# Test ESM imports
+node examples/test-esm.mjs
 
----
+# Test CommonJS requires
+node examples/test-cjs.cjs
 
-## 🛠️ Development
+# Test against live API (requires credentials)
+NORDNET_USERNAME=user NORDNET_PASSWORD=pass node examples/live-test.mjs
+```
 
-### Setup
+## Migration from v1.x
+
+v2.0 is a complete rewrite with breaking changes:
+
+1. **Node.js 18+** now required (was 4.x+)
+2. **TypeScript** - Full type definitions included
+3. **Dual format** - Works with both `import` and `require()`
+4. **Rate limiting** - Built-in by default
+5. **Better errors** - Descriptive error messages
+
+The API interface remains mostly the same. Update your Node version and you should be good to go.
+
+## Development
 
 ```bash
 git clone https://github.com/zjael/nordnet-api.git
 cd nordnet-api
 npm install
+npm test
 ```
 
-### Scripts
-
+**Build:**
 ```bash
-# Build
-npm run build        # Build both ESM and CJS with tsup
-npm run dev          # Watch mode for development
-
-# Testing
-npm test             # Run unit tests
-npm run test:watch   # Run tests in watch mode
-npm run test:coverage # Generate coverage report
-
-# Manual testing
-node examples/test-esm.mjs              # Test ESM build
-node examples/test-cjs.cjs              # Test CJS build
-node examples/live-test.mjs user pass   # Live API test
-
-# Code quality
-npm run lint         # Lint code
-npm run lint:fix     # Lint and auto-fix
-npm run format       # Format code with Prettier
-npm run typecheck    # Type-check without building
+npm run build        # Dual ESM/CJS build
+npm run dev          # Watch mode
 ```
 
-### Project Structure
-
-```
-nordnet-api/
-├── src/
-│   ├── index.ts           # Main Nordnet client
-│   ├── cookie.ts          # Cookie parsing utilities
-│   ├── rate-limiter.ts    # Rate limiting logic
-│   ├── types.ts           # TypeScript type definitions
-│   └── *.test.ts          # Unit tests
-├── examples/
-│   ├── test-esm.mjs       # ESM import test
-│   ├── test-cjs.cjs       # CommonJS require test
-│   └── live-test.mjs      # Live API test
-├── dist/                  # Compiled output (ESM + CJS)
-│   ├── index.js           # ESM build
-│   ├── index.cjs          # CommonJS build
-│   ├── index.d.ts         # ESM type definitions
-│   └── index.d.cts        # CJS type definitions
-├── tsconfig.json          # TypeScript configuration
-├── tsup.config.ts         # Build configuration (dual ESM/CJS)
-├── vitest.config.ts       # Test configuration
-├── .eslintrc.json         # Linting rules
-├── .prettierrc            # Code formatting
-├── package.json
-└── README.md
+**Test:**
+```bash
+npm test             # Unit tests
+npm run test:watch   # Watch mode
 ```
 
----
+**Lint:**
+```bash
+npm run lint         # Check
+npm run lint:fix     # Fix
+npm run format       # Prettier
+```
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please follow these guidelines:
+Contributions welcome. Please:
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run tests: `npm test`
-5. Run linter: `npm run lint:fix`
-6. Commit with descriptive messages
-7. Push to your fork
-8. Open a Pull Request
+1. Fork the repo
+2. Create a feature branch
+3. Add tests if applicable
+4. Run `npm run lint:fix` and `npm test`
+5. Submit a PR
 
-### Code Style
+## License
 
-- Follow the existing TypeScript style
-- Use Prettier for formatting (`npm run format`)
-- Use ESLint for linting (`npm run lint:fix`)
-- Write tests for new features
-- Maintain 100% test coverage
+MIT
 
----
+## Disclaimer
 
-## 📄 License
-
-MIT © Jakob Sjælland
-
----
-
-## 🙏 Acknowledgments
-
-- This library is not affiliated with or endorsed by Nordnet Bank AB
-- Uses web scraping techniques - may break without notice
-- For production use, consider Nordnet's [official External API](https://www.nordnet.dk/externalapi/docs/api)
-
----
-
-## 📞 Support
-
-- 🐛 [Report bugs](https://github.com/zjael/nordnet-api/issues)
-- 💡 [Request features](https://github.com/zjael/nordnet-api/issues)
-- 📖 [Read the source](https://github.com/zjael/nordnet-api)
-
----
-
-**Made with ❤️ by the community**
+This library is not affiliated with or endorsed by Nordnet Bank AB. It may violate Nordnet's Terms of Service. The authors are not responsible for any consequences of using this library.
